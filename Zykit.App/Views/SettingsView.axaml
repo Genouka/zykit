@@ -121,6 +121,134 @@
                     </suki:SettingsLayoutItem.Content>
                 </suki:SettingsLayoutItem>
 
+                <!-- Hokit 兼容模式 -->
+                <suki:SettingsLayoutItem Header="Hokit兼容模式">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard Margin="0,10,0,0" Padding="25">
+                            <StackPanel Spacing="20">
+                                <DockPanel>
+                                    <ToggleSwitch VerticalAlignment="Top"
+                                                  DockPanel.Dock="Right"
+                                                  IsChecked="{Binding AppSettings.HokitCompatibilityMode}" />
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="Hokit 兼容模式" />
+                                        <TextBlock Margin="0,8,70,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="勾选后签名时使用内置的 ho-kit.p12 密钥库与 ho-kit.csr（别名 hokit，口令 hokit9527，SHA256withECDSA），便于兼容已通过 HoKit 签名的应用环境" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <!-- 注册 hokit:// 协议 -->
+                                <Border Background="#11000000" CornerRadius="8" Padding="12">
+                                    <StackPanel Spacing="10">
+                                        <StackPanel>
+                                            <TextBlock FontSize="15" FontWeight="DemiBold" Text="注册 hokit:// 协议" />
+                                            <TextBlock Margin="0,6,0,0"
+                                                       Foreground="{DynamicResource SukiLowText}"
+                                                       TextWrapping="Wrap"
+                                                       Text="向系统注册 hokit:// 协议，注册后浏览器中点击 hokit://sign?url=... 链接将自动唤起织月工具箱并跳转到联动操作页面，完成下载、签名与安装" />
+                                        </StackPanel>
+
+                                        <!-- 协议格式说明 -->
+                                        <Border Background="#11000000" CornerRadius="6" Padding="10">
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="协议格式" FontWeight="SemiBold" FontSize="12" />
+                                                <TextBlock FontFamily="Consolas" FontSize="11" Opacity="0.7" TextWrapping="Wrap"
+                                                           Text="hokit://sign?url={base64编码的下载地址}&amp;headers[]={请求头}&amp;source={来源标识}" />
+                                                <TextBlock FontSize="11" Opacity="0.5" TextWrapping="Wrap"
+                                                           Text="url: 必填，base64 编码的应用下载地址；headers[]: 可选，请求头数组（表单格式 Key: Value）；source: 可选，请求来源标识" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- 注册状态与按钮 -->
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <Button Command="{Binding RegisterHokitProtocolCommand}"
+                                                    IsEnabled="{Binding !IsHokitProtocolRegistered}"
+                                                    Padding="15,8">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <PathIcon Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                                    <TextBlock Text="注册协议" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Command="{Binding UnregisterHokitProtocolCommand}"
+                                                    IsEnabled="{Binding IsHokitProtocolRegistered}"
+                                                    Padding="15,8">
+                                                <TextBlock Text="取消注册" VerticalAlignment="Center" />
+                                            </Button>
+                                        </StackPanel>
+
+                                        <!-- 注册状态提示 -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <PathIcon IsVisible="{Binding IsHokitProtocolRegistered}"
+                                                      Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Foreground="#4CAF50" />
+                                            <PathIcon IsVisible="{Binding !IsHokitProtocolRegistered}"
+                                                      Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-2h-2v2zm0-8h2V7h-2v2z" Foreground="#FF9800" />
+                                            <TextBlock Text="{Binding HokitProtocolStatusText}" VerticalAlignment="Center" Opacity="0.7" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+
+                <!-- 注册 Zykit 协议 -->
+                <suki:SettingsLayoutItem Header="注册Zykit协议">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard Margin="0,10,0,0" Padding="25">
+                            <StackPanel Spacing="15">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Left">
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="注册 zykit:// 协议" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="向系统注册 zykit:// 协议，注册后浏览器中点击 zykit://sign?url=... 链接将自动唤起织月工具箱并跳转到联动操作页面，完成下载、签名与安装。zykit:// 协议与 hokit:// 协议格式完全一致，仅 scheme 不同" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <!-- 协议格式说明 -->
+                                <Border Background="#11000000" CornerRadius="8" Padding="12">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="协议格式" FontWeight="SemiBold" FontSize="13" />
+                                        <TextBlock FontFamily="Consolas" FontSize="11" Opacity="0.7" TextWrapping="Wrap"
+                                                   Text="zykit://sign?url={base64编码的下载地址}&amp;headers[]={请求头}&amp;source={来源标识}" />
+                                        <TextBlock FontSize="11" Opacity="0.5" TextWrapping="Wrap"
+                                                   Text="url: 必填，base64 编码的应用下载地址；headers[]: 可选，请求头数组（表单格式 Key: Value）；source: 可选，请求来源标识" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 注册状态与按钮 -->
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Button Command="{Binding RegisterZykitProtocolCommand}"
+                                            IsEnabled="{Binding !IsZykitProtocolRegistered}"
+                                            Padding="15,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <PathIcon Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                            <TextBlock Text="注册协议" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding UnregisterZykitProtocolCommand}"
+                                            IsEnabled="{Binding IsZykitProtocolRegistered}"
+                                            Padding="15,8">
+                                        <TextBlock Text="取消注册" VerticalAlignment="Center" />
+                                    </Button>
+                                </StackPanel>
+
+                                <!-- 注册状态提示 -->
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon IsVisible="{Binding IsZykitProtocolRegistered}"
+                                              Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Foreground="#4CAF50" />
+                                    <PathIcon IsVisible="{Binding !IsZykitProtocolRegistered}"
+                                              Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v-2h-2v2zm0-8h2V7h-2v2z" Foreground="#FF9800" />
+                                    <TextBlock Text="{Binding ZykitProtocolStatusText}" VerticalAlignment="Center" Opacity="0.7" />
+                                </StackPanel>
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+
                 <!-- 工具路径 -->
                 <suki:SettingsLayoutItem Header="工具路径">
                     <suki:SettingsLayoutItem.Content>
@@ -162,6 +290,18 @@
                                 </StackPanel>
                                 <TextBlock Text="{Binding BuildTimeText}" Opacity="0.5" Margin="110,0,0,0"
                                            IsVisible="{Binding BuildTimeText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                <DockPanel Margin="0,10,0,0">
+                                    <ToggleSwitch VerticalAlignment="Top"
+                                                  DockPanel.Dock="Right"
+                                                  IsChecked="{Binding AppSettings.AutoCheckUpdate}" />
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="自动检查更新" />
+                                        <TextBlock Margin="0,8,70,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="启动时自动检查新版本，发现更新时弹出提示" />
+                                    </StackPanel>
+                                </DockPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
                                     <Button Command="{Binding CheckUpdateCommand}"
                                             IsEnabled="{Binding !IsCheckingUpdate}"

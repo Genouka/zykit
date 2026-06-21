@@ -30,6 +30,8 @@ public class SdkPathProvider : ISdkPathProvider
     public string DebugProfileTemplatePath => FindTool("lib\\UnsgnedDebugProfileTemplate.json", "openharmony", "toolchains", "lib", "UnsgnedDebugProfileTemplate.json");
     public string PermissionDefinitionsPath => FindTool("lib\\PermissionDefinitions.json", "openharmony", "toolchains", "lib", "PermissionDefinitions.json");
     public string ConfigDir => _configDir;
+    public string HokitKeystorePath => Path.Combine(_appDir, "tools", "3rd", "ho-kit.p12");
+    public string HokitCsrPath => Path.Combine(_appDir, "tools", "3rd", "ho-kit.csr");
 
     /// <summary>
     /// 优先查找内嵌工具，找不到再从SDK路径查找

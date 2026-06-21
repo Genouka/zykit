@@ -16,6 +16,7 @@ public class BuildService
     private readonly LocalCacheService _cache;
     private readonly PairingService _pairing;
     private readonly ISdkPathProvider _sdk;
+    private readonly AppSettingsService _appSettings;
 
     public event Action<string, int>? StepStart;
     public event Action<string, string, string>? StepFinish;
@@ -25,7 +26,8 @@ public class BuildService
     private SigningConfig _config = new();
 
     public BuildService(EcoService eco, HdcService hdc, SignService sign,
-        KeyStoreService keyStore, LocalCacheService cache, PairingService pairing, ISdkPathProvider sdk)
+        KeyStoreService keyStore, LocalCacheService cache, PairingService pairing, ISdkPathProvider sdk,
+        AppSettingsService appSettings)
     {
         _eco = eco;
         _hdc = hdc;
@@ -34,7 +36,16 @@ public class BuildService
         _cache = cache;
         _pairing = pairing;
         _sdk = sdk;
+        _appSettings = appSettings;
     }
+
+    /// <summary>是否启用 Hokit 兼容模式（使用内置 ho-kit.p12 / ho-kit.csr）</summary>
+    private bool IsHokitMode => _appSettings.HokitCompatibilityMode;
+
+    /// <summary>Hokit 模式下使用的密钥库别名</summary>
+    private const string HokitKeyAlias = "hokit";
+    /// <summary>Hokit 模式下使用的密钥库口令</summary>
+    private const string HokitKeystorePwd = "hokit9527";
 
     private void OnStepStart(string name, int index) => StepStart?.Invoke(name, index);
     private void OnStepFinish(string name, string value, string msg) => StepFinish?.Invoke(name, value, msg);
@@ -169,13 +180,30 @@ public class BuildService
         }
 
         // 3. 准备密钥库
-        var ksName = existingPair?.KeystoreName ?? "AUTO_ZYKIT";
-        var ksPath = _keyStore.GetKeystorePath(ksName);
-        if (!File.Exists(ksPath))
+        string ksName, ksPath, ksPwd, ksAlias;
+        if (IsHokitMode)
         {
-            var (ksSuccess, ksMsg) = await _keyStore.EnsureKeystoreAndCsrAsync(ksName);
-            if (!ksSuccess) throw new Exception($"创建密钥库失败: {ksMsg}");
-            _cache.CacheKeystore(ksName, ksPath, _keyStore.GetCsrPath(ksName));
+            // Hokit 兼容模式：使用内置 ho-kit.p12，不创建新密钥库
+            ksName = "HOKIT";
+            ksPath = _sdk.HokitKeystorePath;
+            ksPwd = HokitKeystorePwd;
+            ksAlias = HokitKeyAlias;
+            if (!File.Exists(ksPath))
+                throw new Exception($"Hokit 兼容模式缺少内置密钥库: {ksPath}");
+            OnLog($"Hokit 兼容模式：使用内置密钥库 {ksPath}");
+        }
+        else
+        {
+            ksName = existingPair?.KeystoreName ?? "AUTO_ZYKIT";
+            ksPath = _keyStore.GetKeystorePath(ksName);
+            ksPwd = "zykit123";
+            ksAlias = "zykit";
+            if (!File.Exists(ksPath))
+            {
+                var (ksSuccess, ksMsg) = await _keyStore.EnsureKeystoreAndCsrAsync(ksName);
+                if (!ksSuccess) throw new Exception($"创建密钥库失败: {ksMsg}");
+                _cache.CacheKeystore(ksName, ksPath, _keyStore.GetCsrPath(ksName));
+            }
         }
 
         // 4. 准备Profile
@@ -205,8 +233,8 @@ public class BuildService
         var pair = existingPair ?? new SigningPair { PackageName = packageName, AppId = appId ?? "" };
         pair.KeystoreName = ksName;
         pair.KeystorePath = ksPath;
-        pair.KeystorePassword = "zykit123";
-        pair.KeyAlias = "zykit";
+        pair.KeystorePassword = ksPwd;
+        pair.KeyAlias = ksAlias;
         pair.CertCloudId = certId;
         pair.CertLocalPath = certPath;
         pair.CertName = certName;
@@ -404,15 +432,30 @@ public class BuildService
 
         // 创建新证书
         OnLog("创建新密钥库和证书...");
-        var keystorePath = _keyStore.GetKeystorePath("AUTO_ZYKIT");
-        var csrPath = _keyStore.GetCsrPath("AUTO_ZYKIT");
+        string csrContent;
+        if (IsHokitMode)
+        {
+            // Hokit 兼容模式：使用内置 ho-kit.csr，不创建新密钥库
+            var hokitCsrPath = _sdk.HokitCsrPath;
+            if (!File.Exists(hokitCsrPath))
+                throw new Exception($"Hokit 兼容模式缺少内置 CSR: {hokitCsrPath}");
+            csrContent = _sign.ReadCsr(hokitCsrPath);
+            OnLog($"Hokit 兼容模式：使用内置 CSR {hokitCsrPath}");
+        }
+        else
+        {
+            var keystorePath = _keyStore.GetKeystorePath("AUTO_ZYKIT");
+            var csrPath = _keyStore.GetCsrPath("AUTO_ZYKIT");
 
-        foreach (var f in new[] { keystorePath, csrPath })
-            if (File.Exists(f)) try { File.Delete(f); } catch { }
+            foreach (var f in new[] { keystorePath, csrPath })
+                if (File.Exists(f)) try { File.Delete(f); } catch { }
 
-        var (ksSuccess, ksMsg) = await _keyStore.EnsureKeystoreAndCsrAsync("AUTO_ZYKIT");
-        if (!ksSuccess) throw new Exception($"创建密钥库失败: {ksMsg}");
-        _cache.CacheKeystore("AUTO_ZYKIT", keystorePath, csrPath);
+            var (ksSuccess, ksMsg) = await _keyStore.EnsureKeystoreAndCsrAsync("AUTO_ZYKIT");
+            if (!ksSuccess) throw new Exception($"创建密钥库失败: {ksMsg}");
+            _cache.CacheKeystore("AUTO_ZYKIT", keystorePath, csrPath);
+
+            csrContent = _sign.ReadCsr(csrPath);
+        }
 
         // 删除旧的同名证书
         var oldCerts = cloudCerts.Where(c => c.CertName == "AUTO_ZYKIT").ToList();
@@ -422,7 +465,6 @@ public class BuildService
             await _eco.DeleteCertsAsync(oldCerts.Select(c => c.Id).ToList());
         }
 
-        var csrContent = _sign.ReadCsr(csrPath);
         var newCert = await _eco.CreateCertAsync("AUTO_ZYKIT", 1, csrContent);
 
         if (string.IsNullOrEmpty(newCert.CertDownloadUrl))

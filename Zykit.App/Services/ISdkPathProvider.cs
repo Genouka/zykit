@@ -11,4 +11,10 @@ public interface ISdkPathProvider
     string DebugProfileTemplatePath { get; }
     string PermissionDefinitionsPath { get; }
     string ConfigDir { get; }
+
+    /// <summary>内置 Hokit 兼容模式密钥库路径 (tools/3rd/ho-kit.p12)</summary>
+    string HokitKeystorePath { get; }
+
+    /// <summary>内置 Hokit 兼容模式 CSR 路径 (tools/3rd/ho-kit.csr)</summary>
+    string HokitCsrPath { get; }
 }

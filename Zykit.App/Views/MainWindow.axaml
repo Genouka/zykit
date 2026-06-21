@@ -22,7 +22,7 @@
     </suki:SukiWindow.Hosts>
 
     <suki:SukiWindow.Content>
-        <suki:SukiSideMenu IsSearchEnabled="False">
+        <suki:SukiSideMenu x:Name="SideMenu" IsSearchEnabled="False">
             <suki:SukiSideMenu.Items>
                 <suki:SukiSideMenuItem Header="快速开始">
                     <suki:SukiSideMenuItem.Icon>

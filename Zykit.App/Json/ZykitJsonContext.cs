@@ -15,6 +15,7 @@ namespace Zykit.App.Json;
 [JsonSerializable(typeof(AppVersionInfo))]
 [JsonSerializable(typeof(UpdateInfo))]
 [JsonSerializable(typeof(ThemeSettings))]
+[JsonSerializable(typeof(AppSettings))]
 internal partial class ZykitJsonContext : JsonSerializerContext
 {
 }
