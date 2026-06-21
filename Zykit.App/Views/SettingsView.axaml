@@ -1,0 +1,190 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:generic="clr-namespace:System.Collections.Generic;assembly=System.Collections"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Zykit.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <suki:SettingsLayout>
+        <suki:SettingsLayout.Items>
+            <generic:List x:TypeArguments="suki:SettingsLayoutItem">
+
+                <!-- 外观设置 -->
+                <suki:SettingsLayoutItem Header="外观">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard Margin="0,10,0,0" Padding="25">
+                            <StackPanel Spacing="30">
+
+                                <DockPanel>
+                                    <ToggleSwitch VerticalAlignment="Top"
+                                                  DockPanel.Dock="Right"
+                                                  IsChecked="{Binding Theme.IsDarkMode}" />
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="暗色模式" />
+                                        <TextBlock Margin="0,8,70,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="切换应用的明暗主题" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <DockPanel>
+                                    <ComboBox VerticalAlignment="Top"
+                                              DockPanel.Dock="Right"
+                                              MinWidth="160"
+                                              SelectedIndex="{Binding Theme.ColorThemeIndex}">
+                                        <ComboBoxItem Content="蓝色" />
+                                        <ComboBoxItem Content="绿色" />
+                                        <ComboBoxItem Content="红色" />
+                                        <ComboBoxItem Content="橙色" />
+                                    </ComboBox>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="主题色" />
+                                        <TextBlock Margin="0,8,70,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="选择应用的主题色" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <DockPanel>
+                                    <ComboBox VerticalAlignment="Top"
+                                              DockPanel.Dock="Right"
+                                              MinWidth="160"
+                                              SelectedIndex="{Binding Theme.BackgroundStyleIndex}">
+                                        <ComboBoxItem Content="渐变" />
+                                        <ComboBoxItem Content="柔和渐变" />
+                                        <ComboBoxItem Content="深色渐变" />
+                                        <ComboBoxItem Content="纯色" />
+                                        <ComboBoxItem Content="气泡" />
+                                    </ComboBox>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="背景样式" />
+                                        <TextBlock Margin="0,8,70,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="选择窗口的背景渲染样式" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <DockPanel>
+                                    <ToggleSwitch VerticalAlignment="Top"
+                                                  DockPanel.Dock="Right"
+                                                  IsChecked="{Binding Theme.BackgroundAnimationEnabled}" />
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="背景动画" />
+                                        <TextBlock Margin="0,8,70,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="启用背景动画效果，会显著增加 CPU 和 GPU 使用率" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <DockPanel>
+                                    <ToggleSwitch VerticalAlignment="Top"
+                                                  DockPanel.Dock="Right"
+                                                  IsChecked="{Binding Theme.BackgroundTransitionsEnabled}" />
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="DemiBold" Text="背景过渡" />
+                                        <TextBlock Margin="0,8,70,0"
+                                                   Foreground="{DynamicResource SukiLowText}"
+                                                   TextWrapping="Wrap"
+                                                   Text="切换背景样式时使用淡入淡出过渡效果" />
+                                    </StackPanel>
+                                </DockPanel>
+
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+
+                <!-- SDK配置 -->
+                <suki:SettingsLayoutItem Header="SDK配置">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard Margin="0,10,0,0" Padding="25">
+                            <StackPanel Spacing="15">
+                                <TextBlock Foreground="{DynamicResource SukiLowText}"
+                                           TextWrapping="Wrap"
+                                           Text="配置SDK路径，程序已内置常用工具，通常无需修改" />
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBox Text="{Binding SdkPath}" MinWidth="400" />
+                                    <Button Content="浏览" Click="BrowseSdkPath_Click" Padding="10,8" />
+                                    <Button Content="验证" Command="{Binding ValidateSdkCommand}" Padding="10,8" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding SdkValidationMessage}" Opacity="0.7" />
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+
+                <!-- 工具路径 -->
+                <suki:SettingsLayoutItem Header="工具路径">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard Margin="0,10,0,0" Padding="25">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="hdc:" Width="100" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding HdcPath}" Opacity="0.7" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="签名工具:" Width="100" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding SignToolPath}" Opacity="0.7" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="Java:" Width="100" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding JavaPath}" Opacity="0.7" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="keytool:" Width="100" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding KeytoolPath}" Opacity="0.7" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="配置目录:" Width="100" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding ConfigDir}" Opacity="0.7" />
+                                </StackPanel>
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+
+                <!-- 关于 -->
+                <suki:SettingsLayoutItem Header="关于">
+                    <suki:SettingsLayoutItem.Content>
+                        <suki:GlassCard Margin="0,10,0,0" Padding="25">
+                            <StackPanel Spacing="15">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="当前版本:" Width="100" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding AppVersion}" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding BuildTimeText}" Opacity="0.5" Margin="110,0,0,0"
+                                           IsVisible="{Binding BuildTimeText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                                    <Button Command="{Binding CheckUpdateCommand}"
+                                            IsEnabled="{Binding !IsCheckingUpdate}"
+                                            Padding="15,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <PathIcon Data="M12 16l-5.5-5.5 1.41-1.41L11 13.17V4h2v9.17l3.09-3.09L17.5 11.5 12 16zm-7 4h14v2H5v-2z" />
+                                            <TextBlock Text="{Binding CheckUpdateButtonText}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding OpenHomePageCommand}" Padding="15,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <PathIcon Data="M10 2v2.26c2 .24 3.61 1.61 3.85 3.61h2.26c-.25-3.39-2.95-6.1-6.11-6.87zM2 4l8 8 4-4 8 8-2 2-6-6-4 4-8-8 2-2z" />
+                                            <TextBlock Text="访问官网" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </suki:GlassCard>
+                    </suki:SettingsLayoutItem.Content>
+                </suki:SettingsLayoutItem>
+
+            </generic:List>
+        </suki:SettingsLayout.Items>
+    </suki:SettingsLayout>
+
+</UserControl>

@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Zykit.App.Views.LogView"
+             x:DataType="vm:LogViewModel">
+
+    <DockPanel Margin="30">
+        <!-- 工具栏 -->
+        <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,15">
+            <TextBlock Text="日志" FontSize="24" FontWeight="Bold" />
+            <TextBlock Text="查看网络请求、响应和操作日志（敏感信息已隐藏）" Opacity="0.5" />
+            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                <TextBox Text="{Binding FilterText}" MinWidth="200" PlaceholderText="搜索日志..." />
+                <CheckBox IsChecked="{Binding ShowNetwork}" Content="网络日志" />
+                <CheckBox IsChecked="{Binding ShowOperation}" Content="操作日志" />
+                <Button Command="{Binding ClearLogCommand}" Content="清空" Padding="10,8" />
+                <Button Command="{Binding ExportLogCommand}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                        <TextBlock Text="导出" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+
+        <TextBlock Text="{Binding OperationStatus}" DockPanel.Dock="Bottom" Opacity="0.7" Margin="0,10,0,0" />
+
+        <!-- 日志列表 -->
+        <DataGrid x:Name="LogGrid" ItemsSource="{Binding FilteredEntries}" IsReadOnly="True" AutoGenerateColumns="False"
+                  GridLinesVisibility="Horizontal" BorderThickness="1"
+                  FontFamily="Consolas" FontSize="12">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="复制选中行" Click="CopySelected_Click" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="时间" Binding="{Binding DisplayTimestamp}" Width="100" />
+                <DataGridTextColumn Header="" Binding="{Binding DisplayLevel}" Width="30" />
+                <DataGridTextColumn Header="类别" Binding="{Binding Category}" Width="80" />
+                <DataGridTextColumn Header="内容" Binding="{Binding Message}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+
+</UserControl>

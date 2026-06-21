@@ -1,0 +1,16 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Zykit.App.App"
+             xmlns:local="using:Zykit.App"
+             xmlns:suki="clr-namespace:SukiUI;assembly=SukiUI"
+             RequestedThemeVariant="Default">
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <suki:SukiTheme ThemeColor="Blue" />
+    </Application.Styles>
+
+</Application>

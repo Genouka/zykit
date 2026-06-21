@@ -1,0 +1,108 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+             x:Class="Zykit.App.Views.RealDeviceDebugView"
+             x:DataType="vm:RealDeviceDebugViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="20">
+            <TextBlock Text="真机调试" FontSize="24" FontWeight="Bold" Margin="0,0,0,5" />
+            <TextBlock Text="通过 UDID、ACL、包名生成调试 Profile，支持模拟器 UDID，无需物理设备在线" Opacity="0.5" Margin="0,0,0,10" />
+
+            <!-- UDID 输入 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="设备 UDID" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="输入设备或模拟器的 UDID，用于注册设备并绑定到调试 Profile" Opacity="0.5" FontSize="12" TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBox Text="{Binding Udid}" MinWidth="450" PlaceholderText="必填，可点击右侧按钮从设备获取，或手动输入模拟器 UDID" />
+                        <Button Command="{Binding FetchUdidFromDeviceCommand}" Padding="10,8" ToolTip.Tip="从已连接的 USB 设备获取 UDID">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                                <TextBlock Text="从设备获取" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 包名与 AppId -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="应用包名" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="包名:" VerticalAlignment="Center" Width="55" />
+                        <TextBox Text="{Binding PackageName}" MinWidth="280" PlaceholderText="com.example.app (必填)" />
+                        <Button Click="BrowseHapFile_Click" Padding="10,8" ToolTip.Tip="从 HAP 文件自动读取包名并提取 ACL">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                <TextBlock Text="从 HAP 读取" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="AppId:" VerticalAlignment="Center" Width="55" />
+                        <TextBox Text="{Binding AppId}" MinWidth="280" PlaceholderText="可选，留空自动按包名查询" />
+                        <Button Command="{Binding QueryAppIdCommand}" Padding="10,8" ToolTip.Tip="按包名查询 AppId">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                                <TextBlock Text="查询" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Text="AppId 是创建 Profile 的必填项，留空会自动按包名查询；若查询不到需先在 AGC 创建应用" Opacity="0.5" FontSize="12" TextWrapping="Wrap" />
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- ACL 权限选择 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="ACL 权限" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <Button Command="{Binding SelectAllAclCommand}" Content="全选" Padding="8,4" FontSize="12" />
+                        <Button Command="{Binding ClearAclCommand}" Content="清空" Padding="8,4" FontSize="12" />
+                    </StackPanel>
+                    <TextBlock Text="勾选需要写入调试 Profile 的 ACL 权限；从 HAP 读取时会自动匹配 module.json 中的 requestPermissions" Opacity="0.5" FontSize="12" TextWrapping="Wrap" />
+                    <ItemsControl ItemsSource="{Binding AclPermissions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0,2" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 生成按钮 -->
+            <Button Content="生成调试 Profile" Command="{Binding GenerateDebugProfileCommand}" IsEnabled="{Binding !IsGenerating}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    Padding="0,15" FontSize="16" FontWeight="Bold" />
+
+            <!-- 生成进度 -->
+            <suki:GlassCard IsVisible="{Binding IsGenerating}">
+                <StackPanel Margin="20" Spacing="15">
+                    <TextBlock Text="生成进度" FontSize="16" FontWeight="SemiBold" />
+                    <suki:Stepper Index="{Binding CurrentStep}" Steps="{Binding StepNames}" />
+                    <ProgressBar Value="{Binding ProgressValue}" Minimum="0" Maximum="100" />
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 结果与日志 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="状态与日志" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" />
+                    <TextBox Text="{Binding LogText}" IsReadOnly="True" AcceptsReturn="True"
+                             Height="220" FontFamily="Consolas" FontSize="12"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                </StackPanel>
+            </suki:GlassCard>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

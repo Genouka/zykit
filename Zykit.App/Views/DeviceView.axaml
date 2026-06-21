@@ -1,0 +1,166 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+             x:Class="Zykit.App.Views.DeviceView"
+             x:DataType="vm:DeviceViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="20">
+            <TextBlock Text="设备管理" FontSize="24" FontWeight="Bold" Margin="0,0,0,5" />
+            <TextBlock Text="连接并注册鸿蒙设备，安装应用前需要先注册设备到云端" Opacity="0.5" Margin="0,0,0,10" />
+
+            <!-- 连接设备 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="连接设备" FontSize="16" FontWeight="SemiBold" />
+
+                    <!-- USB连接 -->
+                            <Border Background="#11000000" CornerRadius="8" Padding="12">
+                                <StackPanel Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <PathIcon Data="M15 7v4h1V7h-1zm-2 0v4h1V7h-1zm-3 0v4h1V7h-1zM7 7v4h1V7H7zm12.5 2c-.83 0-1.5.67-1.5 1.5.18.62.61 1 1.06 1.27.31.21.44.56.5.94.04.32.22.55.51.55.32 0 .57-.25.56-.57-.04-.5-.16-.93-.46-1.31-.21-.27-.5-.49-.78-.7-.21-.16-.39-.32-.39-.61 0-.28.22-.5.5-.5s.5.22.5.5h1c0-.83-.67-1.5-1.5-1.5zM12 2L8 8h3v8h2V8h3l-4-6z" />
+                                        <TextBlock Text="USB连接" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="用USB线连接手机，自动检测设备" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+                            <Button Command="{Binding RefreshUnifiedListCommand}" IsEnabled="{Binding !IsLoading}" Padding="10,8">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                                    <TextBlock Text="刷新检测" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 无线连接 -->
+                    <Border Background="#11000000" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                                <TextBlock Text="无线连接" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="通过WiFi连接设备（需要先通过USB配对）" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBox Text="{Binding WifiIp1}" Width="55" TextAlignment="Center" />
+                                <TextBlock Text="." VerticalAlignment="Center" />
+                                <TextBox Text="{Binding WifiIp2}" Width="55" TextAlignment="Center" />
+                                <TextBlock Text="." VerticalAlignment="Center" />
+                                <TextBox Text="{Binding WifiIp3}" Width="55" TextAlignment="Center" />
+                                <TextBlock Text="." VerticalAlignment="Center" />
+                                <TextBox Text="{Binding WifiIp4}" Width="55" TextAlignment="Center" />
+                                <TextBlock Text=":" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding WifiPort}" Width="80" TextAlignment="Center" />
+                                <Button Command="{Binding ConnectWifiCommand}" IsEnabled="{Binding !IsConnecting}" Padding="10,8" ToolTip.Tip="连接">
+                                    <PathIcon Data="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                                </Button>
+                                <Button Command="{Binding DisconnectWifiCommand}" Padding="10,8" ToolTip.Tip="断开">
+                                    <PathIcon Data="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" />
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 统一设备列表 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="设备列表" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Command="{Binding RefreshUnifiedListCommand}" IsEnabled="{Binding !IsLoading}" Padding="10,8" ToolTip.Tip="刷新列表">
+                            <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                        </Button>
+                        <Button Command="{Binding DeleteDeviceCommand}" Padding="10,8" ToolTip.Tip="删除选中设备">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                <TextBlock Text="删除" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <DataGrid x:Name="DeviceGrid" ItemsSource="{Binding UnifiedDevices}" SelectedItem="{Binding SelectedDevice}"
+                              SelectionMode="Extended"
+                              IsReadOnly="True" AutoGenerateColumns="False" MinHeight="150"
+                              GridLinesVisibility="All" BorderThickness="1"
+                              DoubleTapped="DeviceGrid_DoubleTapped">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="复制选中行" Click="CopySelected_Click" />
+                                <MenuItem Header="复制">
+                                    <MenuItem Header="UDID" Click="CopyCell_Click" Tag="Udid" />
+                                    <MenuItem Header="名称" Click="CopyCell_Click" Tag="Name" />
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="删除" Command="{Binding DeleteDeviceCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="" Binding="{Binding SourceIcon}" Width="60" />
+                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="UDID" Binding="{Binding Udid}" Width="220" />
+                            <DataGridTextColumn Header="类型" Binding="{Binding TypeName}" Width="80" />
+                            <DataGridTextColumn Header="状态" Binding="{Binding StatusDisplay}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Text="{Binding LocalDeviceInfo}" Opacity="0.7" TextWrapping="Wrap" />
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 注册设备（带参数表单） -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="注册设备到云端" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="连接设备后点击「从设备获取」可自动填充UDID，设备名称可留空使用默认值" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+                    <TextBlock Text="{Binding RegisterFormHint}" Opacity="0.6" TextWrapping="Wrap" />
+
+                    <!-- 设备名称 -->
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="设备名称:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding NewDeviceName}" MinWidth="200" PlaceholderText="可选，留空自动生成" />
+                    </StackPanel>
+
+                    <!-- UDID -->
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="UDID:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding NewDeviceUdid}" MinWidth="300" PlaceholderText="设备唯一标识符" />
+                        <Button Command="{Binding FetchUdidFromDeviceCommand}" Padding="8,6" ToolTip.Tip="从已连接的USB设备自动获取UDID">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                                <TextBlock Text="从设备获取" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding CheckDeviceRegisteredCommand}" Padding="8,6" ToolTip.Tip="检查该UDID是否已在云端注册">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z" />
+                                <TextBlock Text="检查" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- 设备类型 -->
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="设备类型:" VerticalAlignment="Center" Width="70" />
+                        <ComboBox SelectedIndex="3" MinWidth="150">
+                            <ComboBoxItem Content="手机" />
+                            <ComboBoxItem Content="平板" />
+                            <ComboBoxItem Content="手表" />
+                            <ComboBoxItem Content="其他" />
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Button Command="{Binding RegisterDeviceCommand}" IsEnabled="{Binding !IsRegistering}" Padding="12,8" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                            <TextBlock Text="注册设备" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <TextBlock Text="{Binding OperationStatus}" Opacity="0.7" TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

@@ -1,0 +1,177 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+             x:Class="Zykit.App.Views.SigningView"
+             x:DataType="vm:SigningViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="20">
+            <TextBlock Text="签名管理" FontSize="24" FontWeight="Bold" Margin="0,0,0,5" />
+            <TextBlock Text="管理签名证书和密钥库，安装应用时会自动处理签名，通常无需手动操作" Opacity="0.5" Margin="0,0,0,10" />
+
+            <!-- 统一证书列表（置顶） -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="证书列表" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Command="{Binding RefreshUnifiedListCommand}" IsEnabled="{Binding !IsLoading}" Padding="10,8" ToolTip.Tip="刷新列表">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                                <TextBlock Text="刷新" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding DownloadCertCommand}" Padding="10,8" ToolTip.Tip="下载到本地">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                <TextBlock Text="下载" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding DeleteCertCommand}" Padding="10,8" ToolTip.Tip="删除">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                <TextBlock Text="删除" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ClearExpiredCommand}" Padding="10,8" ToolTip.Tip="清理过期缓存">
+                            <PathIcon Data="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 4h-3l-1-1H6L5 4H2v2h12V4z" />
+                        </Button>
+                    </StackPanel>
+                    <DataGrid x:Name="CertGrid" ItemsSource="{Binding UnifiedCerts}" SelectedItem="{Binding SelectedCert}"
+                              SelectionMode="Extended"
+                              IsReadOnly="True" AutoGenerateColumns="False" MinHeight="150"
+                              GridLinesVisibility="All" BorderThickness="1"
+                              DoubleTapped="CertGrid_DoubleTapped">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="复制选中行" Click="CopySelected_Click" />
+                                <MenuItem Header="复制">
+                                    <MenuItem Header="名称" Click="CopyCell_Click" Tag="Name" />
+                                    <MenuItem Header="证书ID" Click="CopyCell_Click" Tag="CloudId" />
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="下载" Command="{Binding DownloadCertCommand}" />
+                                <MenuItem Header="删除" Command="{Binding DeleteCertCommand}" />
+                                <MenuItem Header="删除选中" Command="{Binding DeleteSelectedCertsCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="" Binding="{Binding SourceIcon}" Width="60" />
+                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="类型" Binding="{Binding TypeName}" Width="100" />
+                            <DataGridTextColumn Header="状态" Binding="{Binding StatusDisplay}" Width="80" />
+                            <DataGridTextColumn Header="过期" Binding="{Binding ExpiresDisplay}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 创建证书（折叠） -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <CheckBox IsChecked="{Binding ShowCreateCertForm}" Content="创建新证书" Opacity="0.8" FontWeight="SemiBold" />
+                    <TextBlock IsVisible="{Binding !ShowCreateCertForm}" Text="点击上方勾选展开证书创建表单" Opacity="0.4" FontSize="12" />
+
+                    <StackPanel IsVisible="{Binding ShowCreateCertForm}" Spacing="12">
+                        <TextBlock Text="{Binding CertFormHint}" Opacity="0.6" TextWrapping="Wrap" />
+
+                        <!-- 证书名称 -->
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="证书名称:" VerticalAlignment="Center" Width="70" />
+                            <TextBox Text="{Binding NewCertName}" MinWidth="200" PlaceholderText="输入证书名称" />
+                            <Button Command="{Binding AutoFillCertFormCommand}" Padding="8,6" ToolTip.Tip="填入推荐默认值">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <PathIcon Data="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                    <TextBlock Text="默认" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 证书类型 -->
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="证书类型:" VerticalAlignment="Center" Width="70" />
+                            <ComboBox SelectedIndex="{Binding NewCertType}" MinWidth="150">
+                                <ComboBoxItem Content="调试证书" />
+                                <ComboBoxItem Content="发布证书" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- 密钥库参数 -->
+                        <TextBlock Text="密钥库参数（可选，留空使用默认值）" Opacity="0.5" Margin="0,5,0,0" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="密钥库名:" VerticalAlignment="Center" Width="70" />
+                            <TextBox Text="{Binding NewCertKeystoreName}" MinWidth="150" PlaceholderText="AUTO_ZYKIT" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="密钥库密码:" VerticalAlignment="Center" Width="70" />
+                            <TextBox x:Name="CertKeystorePasswordBox" Text="{Binding NewCertKeystorePassword}" MinWidth="150"
+                                     PasswordChar="*"
+                                     PlaceholderText="zykit" />
+                            <Button x:Name="ToggleCertKeystorePasswordBtn" Content="显示"
+                                    Click="ToggleCertKeystorePassword_Click" Padding="8,6" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="密钥别名:" VerticalAlignment="Center" Width="70" />
+                            <TextBox Text="{Binding NewCertKeyAlias}" MinWidth="150" PlaceholderText="zykit" />
+                            <Button Command="{Binding CheckKeystoreExistsCommand}" Padding="8,6" ToolTip.Tip="检查密钥库是否已存在">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <PathIcon Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z" />
+                                    <TextBlock Text="检查" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <Button Command="{Binding CreateCloudCertCommand}" IsEnabled="{Binding !IsCreatingCert}" Padding="12,8" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                <TextBlock Text="创建证书" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 密钥库管理（折叠） -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <CheckBox IsChecked="{Binding ShowKeystoreSection}" Content="密钥库管理（高级）" Opacity="0.8" FontWeight="SemiBold" />
+                    <TextBlock IsVisible="{Binding !ShowKeystoreSection}" Text="手动管理密钥库和CSR文件，通常无需操作" Opacity="0.4" FontSize="12" />
+
+                    <StackPanel IsVisible="{Binding ShowKeystoreSection}" Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="名称:" VerticalAlignment="Center" Width="50" />
+                            <TextBox Text="{Binding KeystoreName}" MinWidth="150" />
+                            <TextBlock Text="密码:" VerticalAlignment="Center" />
+                            <TextBox x:Name="KeystorePasswordBox" Text="{Binding KeystorePassword}" MinWidth="120"
+                                     PasswordChar="*" />
+                            <Button x:Name="ToggleKeystorePasswordBtn" Content="显示"
+                                    Click="ToggleKeystorePassword_Click" Padding="8,6" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button Command="{Binding CreateKeystoreCommand}" IsEnabled="{Binding !IsCreatingKeystore}" Padding="12,8">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <PathIcon Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                    <TextBlock Text="创建密钥库" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding CreateCsrCommand}" IsEnabled="{Binding !IsCreatingCsr}" Padding="12,8">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <PathIcon Data="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                                    <TextBlock Text="生成CSR" />
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Text="{Binding KeystoreStatus}" Opacity="0.6" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CsrStatus}" Opacity="0.6" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <TextBlock Text="{Binding OperationStatus}" Opacity="0.7" TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

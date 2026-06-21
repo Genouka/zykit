@@ -1,0 +1,120 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
+             x:Class="Zykit.App.Views.PairingView"
+             x:DataType="vm:PairingViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="20">
+            <TextBlock Text="搭配管理" FontSize="24" FontWeight="Bold" Margin="0,0,0,5" />
+            <TextBlock Text="管理包名、AppId、证书、Profile之间的搭配关系，安装应用时自动复用已有搭配" Opacity="0.5" Margin="0,0,0,10" />
+
+            <!-- 搭配列表 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="搭配列表" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Command="{Binding RefreshCommand}" Padding="10,8" ToolTip.Tip="刷新列表">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                                <TextBlock Text="刷新" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding DeletePairCommand}" Padding="10,8" ToolTip.Tip="删除选中搭配">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                <TextBlock Text="删除" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding DeleteSelectedPairsCommand}" Padding="10,8" ToolTip.Tip="删除所有选中的搭配">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                <TextBlock Text="删除选中" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ClearExpiredPairsCommand}" Padding="10,8" ToolTip.Tip="清理过期搭配">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M15 16h4v2h-4zm0-8h7v2h-7zm0 4h6v2h-6zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 4h-3l-1-1H6L5 4H2v2h12V4z" />
+                                <TextBlock Text="清理过期" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <DataGrid x:Name="PairGrid" ItemsSource="{Binding Pairs}" SelectedItem="{Binding SelectedPair}"
+                              IsReadOnly="True" AutoGenerateColumns="False" MinHeight="200"
+                              GridLinesVisibility="All" BorderThickness="1"
+                              SelectionMode="Extended"
+                              DoubleTapped="DataGrid_DoubleTapped">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="复制选中行" Click="CopySelected_Click" />
+                                <MenuItem Header="复制">
+                                    <MenuItem Header="包名" Click="CopyCell_Click" Tag="PackageName" />
+                                    <MenuItem Header="AppId" Click="CopyCell_Click" Tag="AppId" />
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="编辑" Click="MenuEdit_Click" />
+                                <MenuItem Header="删除" Click="MenuDelete_Click" />
+                                <MenuItem Header="更新使用时间" Command="{Binding TouchPairCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="包名" Binding="{Binding PackageName}" Width="*" />
+                            <DataGridTextColumn Header="AppId" Binding="{Binding AppId}" Width="120" />
+                            <DataGridTextColumn Header="证书" Binding="{Binding CertName}" Width="120" />
+                            <DataGridTextColumn Header="Profile" Binding="{Binding ProfileName}" Width="120" />
+                            <DataGridTextColumn Header="密钥库" Binding="{Binding KeystoreName}" Width="100" />
+                            <DataGridTextColumn Header="状态" Binding="{Binding StatusDisplay}" Width="80" />
+                            <DataGridTextColumn Header="最后使用" Binding="{Binding LastUsedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="130" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 编辑搭配 -->
+            <suki:GlassCard IsVisible="{Binding IsEditing}">
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="编辑搭配" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="包名:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding EditPackageName}" MinWidth="250" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="AppId:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding EditAppId}" MinWidth="250" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="证书名:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding EditCertName}" MinWidth="250" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Profile:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding EditProfileName}" MinWidth="250" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="密钥库:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding EditKeystoreName}" MinWidth="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="密钥密码:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding EditKeystorePassword}" MinWidth="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="密钥别名:" VerticalAlignment="Center" Width="70" />
+                        <TextBox Text="{Binding EditKeyAlias}" MinWidth="200" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Command="{Binding SaveEditPairCommand}" Content="保存" Padding="15,8" />
+                        <Button Command="{Binding CancelEditCommand}" Content="取消" Padding="15,8" />
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <TextBlock Text="{Binding OperationStatus}" Opacity="0.7" TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

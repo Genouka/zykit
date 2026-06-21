@@ -1,0 +1,419 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
+             x:Class="Zykit.App.Views.WizardView"
+             x:DataType="vm:WizardViewModel">
+
+    <DockPanel Margin="30">
+        <!-- 标题 -->
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,20">
+            <TextBlock Text="快速开始" FontSize="24" FontWeight="Bold" />
+            <TextBlock Text="按照以下步骤，轻松完成鸿蒙应用的签名和安装" Opacity="0.6" Margin="0,5,0,0" />
+        </StackPanel>
+
+        <!-- 步骤指示器 -->
+        <suki:Stepper DockPanel.Dock="Top" Index="{Binding CurrentStepIndex}" Steps="{Binding Steps}" Margin="0,0,0,30" />
+
+        <!-- 步骤内容区域 -->
+        <ScrollViewer>
+            <Grid>
+                <!-- ==================== 步骤0: 登录账号 ==================== -->
+                <StackPanel IsVisible="{Binding IsStep0}" Spacing="20">
+                    <suki:GlassCard>
+                        <StackPanel Margin="20" Spacing="15">
+                            <TextBlock Text="第一步：登录华为开发者账号" FontSize="18" FontWeight="SemiBold" />
+                            <TextBlock Text="登录后才能使用应用签名和安装功能。如果您还没有华为开发者账号，请先注册。" Opacity="0.6" TextWrapping="Wrap" />
+
+                            <!-- 登录状态 -->
+                            <TextBlock Text="{Binding LoginStatus}" FontSize="16" />
+                            <TextBlock Text="{Binding UserDetail}" FontSize="12" Opacity="0.6" />
+
+                            <!-- 错误提示 -->
+                            <Border IsVisible="{Binding AccountErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                    Background="#22FF4444" CornerRadius="8" Padding="15">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="{Binding AccountErrorMessage}" TextWrapping="Wrap" />
+                                    <Button Content="重试登录" Command="{Binding LoginCommand}" Padding="15,8" HorizontalAlignment="Left" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 登录按钮 -->
+                            <Button Command="{Binding LoginCommand}"
+                                    IsVisible="{Binding !IsLoggedIn}"
+                                    IsEnabled="{Binding !IsLoggingIn}"
+                                    Padding="20,10" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                    <TextBlock Text="{Binding IsLoggingIn, Converter={x:Static StringConverters.IsNotNullOrEmpty}, ConverterParameter='登录中...|登录华为账号'}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- 登录成功提示 -->
+                            <StackPanel IsVisible="{Binding IsLoggedIn}" Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                                <PathIcon Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Foreground="#4CAF50" />
+                                <TextBlock Text="已登录，可以继续下一步" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                    </suki:GlassCard>
+
+                    <!-- 下一步按钮 -->
+                    <Button Command="{Binding NextStepCommand}" IsEnabled="{Binding CanGoNext}"
+                            HorizontalAlignment="Right" Padding="20,12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="下一步：连接设备" VerticalAlignment="Center" />
+                            <PathIcon Data="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- ==================== 步骤1: 连接设备 ==================== -->
+                <StackPanel IsVisible="{Binding IsStep1}" Spacing="20">
+                    <suki:GlassCard>
+                        <StackPanel Margin="20" Spacing="15">
+                            <TextBlock Text="第二步：连接鸿蒙设备" FontSize="18" FontWeight="SemiBold" />
+
+                            <!-- 模式切换：标准模式 / 真机调试模式 -->
+                            <Border Background="#11000000" CornerRadius="8" Padding="15">
+                                <StackPanel Spacing="8">
+                                    <CheckBox IsChecked="{Binding IsRealDeviceDebugMode}" Content="真机调试模式（支持模拟器 UDID，无需物理设备在线）" />
+                                    <TextBlock Text="{Binding IsRealDeviceDebugMode, Converter={x:Static StringConverters.IsNotNullOrEmpty}, ConverterParameter='已开启真机调试：通过 UDID + ACL + 包名生成调试 Profile，可连接设备后用「从设备获取」填充 UDID|未开启：使用 USB/WiFi 连接物理设备'}"
+                                               Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 真机调试：手动输入 UDID -->
+                            <Border Background="#11000000" CornerRadius="8" Padding="15" IsVisible="{Binding IsRealDeviceDebugMode}">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <PathIcon Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                                        <TextBlock Text="设备 UDID" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding ManualUdidHint}" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBox Text="{Binding ManualUdid}" MinWidth="400" PlaceholderText="必填，输入设备或模拟器的 UDID" />
+                                        <Button Command="{Binding FetchUdidCommand}" IsEnabled="{Binding !IsFetchingUdid}" Padding="10,8" ToolTip.Tip="从已连接的 USB 设备获取 UDID">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <PathIcon Data="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                                                <TextBlock Text="从设备获取" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                    <StackPanel IsVisible="{Binding ManualUdid, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                                        <PathIcon Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Foreground="#4CAF50" />
+                                        <TextBlock Text="UDID 已填写，可以继续下一步" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 连接方式 -->
+                            <TextBlock Text="连接方式" FontSize="14" FontWeight="SemiBold" Opacity="0.7" Margin="0,5,0,0" />
+
+                            <!-- USB连接 -->
+                            <Border Background="#11000000" CornerRadius="8" Padding="15">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <PathIcon Data="M15 7v4h1V7h-1zm-2 0v4h1V7h-1zm-3 0v4h1V7h-1zM7 7v4h1V7H7zm12.5 2c-.83 0-1.5.67-1.5 1.5.18.62.61 1 1.06 1.27.31.21.44.56.5.94.04.32.22.55.51.55.32 0 .57-.25.56-.57-.04-.5-.16-.93-.46-1.31-.21-.27-.5-.49-.78-.7-.21-.16-.39-.32-.39-.61 0-.28.22-.5.5-.5s.5.22.5.5h1c0-.83-.67-1.5-1.5-1.5zM12 2L8 8h3v8h2V8h3l-4-6z" />
+                                        <TextBlock Text="USB连接" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="用USB线连接手机，自动检测设备" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+
+                                    <!-- 设备检测状态 -->
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="{Binding DeviceStatus}" FontSize="14" VerticalAlignment="Center" />
+                                        <Button Command="{Binding RefreshDevicesCommand}" IsEnabled="{Binding !IsDetectingDevice}" Padding="10,8">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                                                <TextBlock Text="重新检测" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+
+                                    <!-- 已检测到的设备列表 -->
+                                    <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}"
+                                              IsVisible="{Binding IsDeviceReady}" MinWidth="300" Margin="0,5,0,0"
+                                              DisplayMemberBinding="{Binding DisplayName}" />
+
+                                    <!-- 错误提示 -->
+                                    <Border IsVisible="{Binding DeviceErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                            Background="#22FF4444" CornerRadius="8" Padding="15">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="{Binding DeviceErrorMessage}" TextWrapping="Wrap" />
+                                            <Button Content="重新检测设备" Command="{Binding RefreshDevicesCommand}" Padding="15,8" HorizontalAlignment="Left" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- 设备云端注册警告 -->
+                                    <Border IsVisible="{Binding DeviceRegistrationWarning, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                            Background="#22FF9800" CornerRadius="8" Padding="15">
+                                        <StackPanel Spacing="10">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <PathIcon Data="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" Foreground="#FF9800" />
+                                                <TextBlock Text="设备未注册" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding DeviceRegistrationWarning}" TextWrapping="Wrap" />
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Button Command="{Binding RegisterDeviceCommand}" IsEnabled="{Binding !IsRegisteringDevice}" Padding="15,8">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <PathIcon Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                                        <TextBlock Text="{Binding IsRegisteringDevice, Converter={x:Static StringConverters.IsNotNullOrEmpty}, ConverterParameter='注册中...|注册设备到云端'}" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- 设备已注册提示 -->
+                                    <StackPanel IsVisible="{Binding IsDeviceRegistered}" Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                                        <PathIcon Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Foreground="#4CAF50" />
+                                        <TextBlock Text="设备已在云端注册" VerticalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <!-- 设备就绪提示 -->
+                                    <StackPanel IsVisible="{Binding IsDeviceReady}" Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                                        <PathIcon Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Foreground="#4CAF50" />
+                                        <TextBlock Text="设备已就绪，可以继续下一步" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 无线连接 -->
+                            <Border Background="#11000000" CornerRadius="8" Padding="15">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <PathIcon Data="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                                        <TextBlock Text="无线连接" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="通过WiFi连接设备（需要先通过USB配对）" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <TextBox Text="{Binding WifiIp1}" Width="55" TextAlignment="Center" />
+                                        <TextBlock Text="." VerticalAlignment="Center" />
+                                        <TextBox Text="{Binding WifiIp2}" Width="55" TextAlignment="Center" />
+                                        <TextBlock Text="." VerticalAlignment="Center" />
+                                        <TextBox Text="{Binding WifiIp3}" Width="55" TextAlignment="Center" />
+                                        <TextBlock Text="." VerticalAlignment="Center" />
+                                        <TextBox Text="{Binding WifiIp4}" Width="55" TextAlignment="Center" />
+                                        <TextBlock Text=":" VerticalAlignment="Center" />
+                                        <TextBox Text="{Binding WifiPort}" Width="80" TextAlignment="Center" />
+                                        <Button Command="{Binding ConnectWifiCommand}" IsEnabled="{Binding !IsConnectingWifi}" Padding="10,8" Content="连接" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </suki:GlassCard>
+
+                    <!-- 导航按钮 -->
+                    <DockPanel>
+                        <Button Command="{Binding PreviousStepCommand}" Padding="20,12" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                                <TextBlock Text="上一步" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding NextStepCommand}" IsEnabled="{Binding CanGoNext}"
+                                HorizontalAlignment="Right" Padding="20,12">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="下一步：安装应用" VerticalAlignment="Center" />
+                                <PathIcon Data="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                            </StackPanel>
+                        </Button>
+                    </DockPanel>
+                </StackPanel>
+
+                <!-- ==================== 步骤2: 安装应用 ==================== -->
+                <StackPanel IsVisible="{Binding IsStep2}" Spacing="20">
+                    <!-- 选择HAP文件 -->
+                    <suki:GlassCard>
+                        <StackPanel Margin="20" Spacing="15">
+                            <TextBlock Text="第三步：选择并安装应用" FontSize="18" FontWeight="SemiBold" />
+                            <TextBlock Text="选择要安装的HAP应用文件，点击安装即可自动完成签名和安装到设备。" Opacity="0.6" TextWrapping="Wrap" />
+
+                            <!-- HAP文件选择 -->
+                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                                <TextBlock Text="{Binding HapFileName}" VerticalAlignment="Center" Opacity="0.7" />
+                                <Button Content="选择文件" Click="BrowseHapFile_Click" Padding="15,8" IsEnabled="{Binding !IsInstalling}" />
+                            </StackPanel>
+
+                            <!-- 包名信息 -->
+                            <StackPanel Orientation="Horizontal" Spacing="15" IsVisible="{Binding PackageName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <TextBlock Text="包名:" Opacity="0.6" />
+                                <TextBlock Text="{Binding PackageName}" />
+                            </StackPanel>
+
+                            <!-- 搭配状态提示 -->
+                            <Border IsVisible="{Binding PairingStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                    Background="#22000000" CornerRadius="8" Padding="12">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="{Binding PairingStatus}" TextWrapping="Wrap" FontSize="13" />
+                                    <!-- 快速生成按钮：缺少适用资源时显示 -->
+                                    <Button Command="{Binding QuickGenerateCommand}" IsEnabled="{Binding !IsQuickGenerating}"
+                                            IsVisible="{Binding !HasApplicableCert}"
+                                            Padding="12,6" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <PathIcon Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                            <TextBlock Text="{Binding IsQuickGenerating, Converter={x:Static StringConverters.IsNotNullOrEmpty}, ConverterParameter='生成中...|快速生成签名资源'}" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </suki:GlassCard>
+
+                    <!-- 真机调试：ACL 权限选择 -->
+                    <suki:GlassCard IsVisible="{Binding IsRealDeviceDebugMode}">
+                        <StackPanel Margin="20" Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <CheckBox IsChecked="{Binding ShowAclOptions}" Content="ACL 权限" FontSize="16" FontWeight="SemiBold" />
+                                <Button Command="{Binding SelectAllAclCommand}" Content="全选" Padding="8,4" FontSize="12" IsVisible="{Binding ShowAclOptions}" />
+                                <Button Command="{Binding ClearAclCommand}" Content="清空" Padding="8,4" FontSize="12" IsVisible="{Binding ShowAclOptions}" />
+                            </StackPanel>
+                            <TextBlock IsVisible="{Binding !ShowAclOptions}" Text="选择 HAP 文件后会自动提取 ACL 权限；点击左侧勾选框可手动调整" Opacity="0.4" FontSize="12" />
+                            <StackPanel IsVisible="{Binding ShowAclOptions}" Spacing="8">
+                                <TextBlock Text="勾选需要写入调试 Profile 的 ACL 权限（从 HAP 的 module.json 自动匹配 requestPermissions）" Opacity="0.5" FontSize="12" TextWrapping="Wrap" />
+                                <ItemsControl ItemsSource="{Binding AclPermissions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0,2" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </suki:GlassCard>
+
+                    <!-- 高级选项：签名和Profile选择 -->
+                    <suki:GlassCard>
+                        <StackPanel Margin="20" Spacing="12">
+                            <CheckBox IsChecked="{Binding ShowAdvancedOptions}" Content="高级选项：选择签名证书和Profile" Opacity="0.8" />
+                            <TextBlock IsVisible="{Binding !ShowAdvancedOptions}" Text="不勾选将自动使用或创建签名资源" Opacity="0.4" FontSize="12" />
+
+                            <StackPanel IsVisible="{Binding ShowAdvancedOptions}" Spacing="12">
+                                <TextBlock Text="默认情况下会自动选择或创建签名资源，只有需要指定特定证书或Profile时才需要手动选择。" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+
+                                <!-- 证书选择 -->
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="签名证书" FontWeight="SemiBold" />
+                                    <ComboBox ItemsSource="{Binding AvailableCerts}" SelectedItem="{Binding SelectedCert}" MinWidth="300"
+                                              PlaceholderText="{Binding HasApplicableCert, Converter={x:Static StringConverters.IsNotNullOrEmpty}, ConverterParameter='无适用证书|选择证书'}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding SourceIcon}" />
+                                                    <TextBlock Text="{Binding Name}" />
+                                                    <TextBlock Text="{Binding TypeName}" Opacity="0.5" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBlock IsVisible="{Binding !HasApplicableCert}" Text="无适用证书，请点击上方「快速生成签名资源」按钮" Opacity="0.6" FontSize="12" Foreground="#FF9800" />
+                                    <TextBlock IsVisible="{Binding HasApplicableCert}" Text="留空则自动创建新证书" Opacity="0.4" FontSize="12" />
+                                </StackPanel>
+
+                                <!-- Profile选择 -->
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Profile" FontWeight="SemiBold" />
+                                    <ComboBox ItemsSource="{Binding AvailableProfiles}" SelectedItem="{Binding SelectedProfile}" MinWidth="300"
+                                              PlaceholderText="{Binding HasApplicableProfile, Converter={x:Static StringConverters.IsNotNullOrEmpty}, ConverterParameter='无适用Profile|选择Profile'}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding SourceIcon}" />
+                                                    <TextBlock Text="{Binding Name}" />
+                                                    <TextBlock Text="{Binding PackageName}" Opacity="0.5" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBlock IsVisible="{Binding !HasApplicableProfile}" Text="无适用Profile，请点击上方「快速生成签名资源」按钮" Opacity="0.6" FontSize="12" Foreground="#FF9800" />
+                                    <TextBlock IsVisible="{Binding HasApplicableProfile}" Text="留空则自动创建新Profile" Opacity="0.4" FontSize="12" />
+                                </StackPanel>
+
+                                <Button Command="{Binding LoadSigningResourcesCommand}" IsEnabled="{Binding !IsLoadingResources}" Padding="10,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                                        <TextBlock Text="刷新资源列表" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </suki:GlassCard>
+
+                    <!-- 安装操作 -->
+                    <suki:GlassCard>
+                        <StackPanel Margin="20" Spacing="15">
+                            <TextBlock Text="安装" FontSize="16" FontWeight="SemiBold" />
+
+                            <!-- 安装按钮 -->
+                            <Button Command="{Binding OneClickInstallCommand}" IsEnabled="{Binding !IsInstalling}"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Padding="0,15" FontSize="16" FontWeight="Bold"
+                                    IsVisible="{Binding !InstallCompleted}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                    <TextBlock Text="一键签名安装" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- 安装进度 -->
+                            <StackPanel IsVisible="{Binding IsInstalling}" Spacing="12">
+                                <suki:Stepper Index="{Binding InstallStepIndex}" Steps="{Binding InstallSteps}" />
+                                <TextBlock Text="{Binding InstallStatus}" />
+                                <ProgressBar Value="{Binding ProgressValue}" Minimum="0" Maximum="100" />
+                            </StackPanel>
+
+                            <!-- 安装成功 -->
+                            <Border IsVisible="{Binding InstallSuccess}" Background="#224CAF50" CornerRadius="8" Padding="15">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <PathIcon Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" Foreground="#4CAF50" />
+                                        <TextBlock Text="{Binding InstallResultMessage}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Button Content="安装另一个应用" Command="{Binding ResetInstallCommand}" Padding="15,8" HorizontalAlignment="Left" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 安装失败 -->
+                            <Border IsVisible="{Binding InstallErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                    Background="#22FF4444" CornerRadius="8" Padding="15">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="{Binding InstallErrorMessage}" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Button Content="重试安装" Command="{Binding ResetInstallCommand}" Padding="15,8" />
+                                        <Button Content="查看详细日志" Click="ToggleLog_Click" Padding="15,8" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </suki:GlassCard>
+
+                    <!-- 高级：安装日志 -->
+                    <suki:GlassCard IsVisible="{Binding ShowAdvancedLog}">
+                        <StackPanel Margin="20" Spacing="10">
+                            <TextBlock Text="详细日志" FontSize="14" FontWeight="SemiBold" Opacity="0.7" />
+                            <TextBox Text="{Binding LogText}" IsReadOnly="True" AcceptsReturn="True"
+                                     Height="200" FontFamily="Consolas" FontSize="12"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                        </StackPanel>
+                    </suki:GlassCard>
+
+                    <!-- 导航按钮 -->
+                    <DockPanel IsVisible="{Binding !IsInstalling}">
+                        <Button Command="{Binding PreviousStepCommand}" Padding="20,12" HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                                <TextBlock Text="上一步" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DockPanel>
+
+                    <!-- 高级提示 -->
+                    <TextBlock Text="如需手动管理签名资源，请在左侧菜单中选择对应的管理页面" Opacity="0.4" TextWrapping="Wrap" FontSize="12" />
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </DockPanel>
+
+</UserControl>

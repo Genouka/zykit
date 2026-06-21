@@ -1,0 +1,132 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Zykit.App.Views.AppIdView"
+             x:DataType="vm:AppIdViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="20">
+            <TextBlock Text="AppId管理" FontSize="24" FontWeight="Bold" Margin="0,0,0,5" />
+            <TextBlock Text="查询和管理应用的AppId，创建Profile时需要提供AppId" Opacity="0.5" Margin="0,0,0,10" />
+
+            <!-- 查询AppId -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="15">
+                    <TextBlock Text="查询AppId" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="输入应用包名查询对应的AppId。AppId是华为AGC为每个应用分配的唯一标识，创建Profile时必填。" Opacity="0.6" TextWrapping="Wrap" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="包名:" VerticalAlignment="Center" Width="50" />
+                        <TextBox Text="{Binding QueryPackageName}" MinWidth="300" PlaceholderText="com.example.myapp" />
+                        <Button Command="{Binding QueryAppIdCommand}" IsEnabled="{Binding !IsQuerying}" Padding="15,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z" />
+                                <TextBlock Text="查询" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- 查询结果 -->
+                    <DataGrid x:Name="AppIdGrid" ItemsSource="{Binding AppIds}" SelectedItem="{Binding SelectedAppId}"
+                              IsReadOnly="True" AutoGenerateColumns="False" MinHeight="100"
+                              GridLinesVisibility="All" BorderThickness="1">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="复制选中行" Click="CopySelected_Click" />
+                                <MenuItem Header="复制">
+                                    <MenuItem Header="AppId" Click="CopyCell_Click" Tag="AppId" />
+                                    <MenuItem Header="包名" Click="CopyCell_Click" Tag="PackageName" />
+                                </MenuItem>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="包名" Binding="{Binding PackageName}" Width="*" />
+                            <DataGridTextColumn Header="AppId" Binding="{Binding AppId}" Width="200" />
+                            <DataGridTextColumn Header="应用名称" Binding="{Binding AppName}" Width="150" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Command="{Binding CopyAppIdCommand}" Padding="10,8" ToolTip.Tip="复制选中的AppId到剪贴板">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <PathIcon Data="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                <TextBlock Text="复制AppId" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding OperationStatus}" Opacity="0.7" TextWrapping="Wrap" />
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 创建AppId引导 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <TextBlock Text="创建新应用（获取AppId）" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="如果查询不到AppId，说明该包名尚未在AGC创建应用。创建应用没有API接口，需要手动在AGC网站上操作。请按照以下步骤完成创建：" Opacity="0.6" TextWrapping="Wrap" />
+
+                    <!-- 第一步：创建APP ID -->
+                    <Border Background="#15000000" CornerRadius="8" Padding="16,12" Margin="0,8,0,0">
+                        <StackPanel Spacing="8">
+                            <TextBlock FontWeight="SemiBold" FontSize="14">
+                                <Run Text="第一步：创建APP ID" />
+                            </TextBlock>
+                            <TextBlock Text="1. 点击下方按钮打开AGC网站，登录后选择「证书、APP ID和Profile」" Opacity="0.85" Margin="10,0,0,0" TextWrapping="Wrap" />
+                            <TextBlock Text="2. 在左侧导航栏选择「证书、APP ID和Profile &gt; APP ID」，点击右上角「新建」" Opacity="0.85" Margin="10,0,0,0" TextWrapping="Wrap" />
+                            <TextBlock Text="3. 填写应用基础信息：" Opacity="0.85" Margin="10,0,0,0" />
+                            <TextBlock Text="    - 应用类型：选择「HarmonyOS应用」" Opacity="0.75" Margin="10,0,0,0" />
+                            <TextBlock Text="    - 应用名称：应用在华为应用市场展示的名称" Opacity="0.75" Margin="10,0,0,0" />
+                            <TextBlock Text="    - 应用包名：必须与您的应用包名一致（如 com.example.myapp）" Opacity="0.75" Margin="10,0,0,0" />
+                            <TextBlock Text="    - 应用分类：选择「应用」或「游戏」" Opacity="0.75" Margin="10,0,0,0" />
+                            <TextBlock Text="4. 在「开放能力接入」页面选择所属项目，点击「确认」" Opacity="0.85" Margin="10,0,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 第二步：开放能力（可选） -->
+                    <Border Background="#10000000" CornerRadius="8" Padding="16,12">
+                        <StackPanel Spacing="8">
+                            <TextBlock FontWeight="SemiBold" FontSize="14">
+                                <Run Text="第二步（可选）：开启华为开放能力" />
+                            </TextBlock>
+                            <TextBlock Text="如果您的应用需要使用华为开放能力（如推送、账号等），需要在AGC开启对应的能力开关。如无需接入，直接点击「确认」跳过即可。" Opacity="0.85" Margin="10,0,0,0" TextWrapping="Wrap" />
+                            <TextBlock Text="注意：开放能力配置会写入Profile，建议在申请Profile前完成配置。如果之后修改了开放能力，需要重新下载Profile。" Opacity="0.7" Margin="10,0,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 第三步：关联创建发布应用 -->
+                    <Border Background="#10000000" CornerRadius="8" Padding="16,12">
+                        <StackPanel Spacing="8">
+                            <TextBlock FontWeight="SemiBold" FontSize="14">
+                                <Run Text="第三步：关联创建待发布应用" />
+                            </TextBlock>
+                            <TextBlock Text="APP ID生成后，还需要为其关联创建待发布的应用，完成后应用才会出现在应用列表中：" Opacity="0.85" Margin="10,0,0,0" TextWrapping="Wrap" />
+                            <TextBlock Text="1. 在「APP ID」页面，找到刚创建的APP ID，点击「操作」列的「发布」" Opacity="0.85" Margin="10,0,0,0" TextWrapping="Wrap" />
+                            <TextBlock Text="2. 在弹出的窗口中补充应用信息（支持设备、默认语言等），点击「确认」" Opacity="0.85" Margin="10,0,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5,0,0">
+                        <Button Command="{Binding OpenCreateAppUrlCommand}" Padding="15,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                                <TextBlock Text="前往AGC创建应用" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding QueryAppIdCommand}" Padding="15,8" Opacity="0.8"
+                                IsEnabled="{Binding !IsQuerying}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z" />
+                                <TextBlock Text="创建完成后查询AppId" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

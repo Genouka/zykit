@@ -1,0 +1,109 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Zykit.App.Views.InstallView"
+             x:DataType="vm:InstallViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="20">
+            <TextBlock Text="应用安装" FontSize="24" FontWeight="Bold" Margin="0,0,0,5" />
+            <TextBlock Text="手动签名安装HAP应用，推荐新手使用左侧「快速开始」向导" Opacity="0.5" Margin="0,0,0,10" />
+
+            <!-- 选择HAP文件 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="15">
+                    <TextBlock Text="选择HAP文件" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="{Binding HapFileName}" VerticalAlignment="Center" Opacity="0.7" />
+                        <Button Content="浏览" Click="BrowseHapFile_Click" Padding="15,8" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="15" IsVisible="{Binding PackageName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock Text="包名:" Opacity="0.6" />
+                        <TextBlock Text="{Binding PackageName}" />
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 选择设备 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="15">
+                    <TextBlock Text="选择安装设备" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}" MinWidth="300" />
+                        <Button Content="刷新" Command="{Binding RefreshDevicesCommand}" Padding="10,8" />
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 高级选项：签名和Profile选择 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="12">
+                    <CheckBox IsChecked="{Binding ShowAdvancedOptions}" Content="高级选项：指定签名证书和Profile" Opacity="0.8" />
+                    <TextBlock IsVisible="{Binding !ShowAdvancedOptions}" Text="不勾选将自动使用或创建签名资源" Opacity="0.4" FontSize="12" />
+                    <StackPanel IsVisible="{Binding ShowAdvancedOptions}" Spacing="12">
+                        <TextBlock Text="默认情况下会自动选择或创建签名资源，只有需要指定特定证书或Profile时才需要手动选择。" Opacity="0.5" TextWrapping="Wrap" FontSize="12" />
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="签名证书" FontWeight="SemiBold" />
+                            <ComboBox ItemsSource="{Binding AvailableCerts}" SelectedItem="{Binding SelectedCert}" MinWidth="300">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding SourceIcon}" />
+                                            <TextBlock Text="{Binding Name}" />
+                                            <TextBlock Text="{Binding TypeName}" Opacity="0.5" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Text="留空则自动创建新证书" Opacity="0.4" FontSize="12" />
+                        </StackPanel>
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Profile" FontWeight="SemiBold" />
+                            <ComboBox ItemsSource="{Binding AvailableProfiles}" SelectedItem="{Binding SelectedProfile}" MinWidth="300">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding SourceIcon}" />
+                                            <TextBlock Text="{Binding Name}" />
+                                            <TextBlock Text="{Binding PackageName}" Opacity="0.5" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Text="留空则自动创建新Profile" Opacity="0.4" FontSize="12" />
+                        </StackPanel>
+                        <Button Command="{Binding LoadSigningResourcesCommand}" IsEnabled="{Binding !IsLoadingResources}" Padding="10,8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                                <TextBlock Text="刷新资源列表" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <!-- 安装按钮 -->
+            <Button Content="一键签名安装" Command="{Binding OneClickInstallCommand}" IsEnabled="{Binding !IsInstalling}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    Padding="0,15" FontSize="16" FontWeight="Bold" />
+
+            <!-- 安装进度 -->
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="15">
+                    <TextBlock Text="安装进度" FontSize="16" FontWeight="SemiBold" />
+                    <suki:Stepper Index="{Binding CurrentStep}" Steps="{Binding StepNames}" IsVisible="{Binding IsInstalling}" />
+                    <TextBlock Text="{Binding InstallStatus}" />
+                    <ProgressBar Value="{Binding ProgressValue}" Minimum="0" Maximum="100" />
+                    <TextBox Text="{Binding LogText}" IsReadOnly="True" AcceptsReturn="True"
+                             Height="200" FontFamily="Consolas" FontSize="12"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                </StackPanel>
+            </suki:GlassCard>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

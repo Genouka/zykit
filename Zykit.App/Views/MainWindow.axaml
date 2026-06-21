@@ -1,0 +1,129 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:vm="using:Zykit.App.ViewModels"
+                 xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+                 xmlns:views="using:Zykit.App.Views"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="750"
+                 x:Class="Zykit.App.Views.MainWindow"
+                 x:DataType="vm:MainWindowViewModel"
+                 Title="织月工具箱"
+                 BackgroundStyle="{Binding Theme.BackgroundStyle}"
+                 BackgroundAnimationEnabled="{Binding Theme.BackgroundAnimationEnabled}"
+                 BackgroundTransitionsEnabled="{Binding Theme.BackgroundTransitionsEnabled}">
+
+    <suki:SukiWindow.LogoContent>
+        <TextBlock Text="ZYKIT" FontWeight="Bold" FontSize="16" Margin="10,0"/>
+    </suki:SukiWindow.LogoContent>
+
+    <suki:SukiWindow.Hosts>
+        <suki:SukiToastHost Manager="{Binding ToastManager}" MaxToasts="5" />
+    </suki:SukiWindow.Hosts>
+
+    <suki:SukiWindow.Content>
+        <suki:SukiSideMenu IsSearchEnabled="False">
+            <suki:SukiSideMenu.Items>
+                <suki:SukiSideMenuItem Header="快速开始">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 3.73-2.56 6.86-6.02 7.75l.72 1.93C18.84 20.54 22 16.63 22 12c0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zM11 2.06C5.93 2.56 2 6.84 2 12c0 4.63 3.16 8.54 7.3 9.69l.72-1.94C6.56 18.86 4 15.73 4 12c0-4.08 3.05-7.44 7-7.93V2.06z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:WizardView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="账号管理">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:AccountView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="签名管理">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:SigningView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="Profile管理">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:ProfileView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="AppId管理">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:AppIdView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="搭配管理">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:PairingView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="设备管理">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:DeviceView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="应用安装">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:InstallView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="真机调试">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:RealDeviceDebugView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="日志">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:LogView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+
+                <suki:SukiSideMenuItem Header="设置">
+                    <suki:SukiSideMenuItem.Icon>
+                        <PathIcon Data="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                    </suki:SukiSideMenuItem.Icon>
+                    <suki:SukiSideMenuItem.PageContent>
+                        <views:SettingsView />
+                    </suki:SukiSideMenuItem.PageContent>
+                </suki:SukiSideMenuItem>
+            </suki:SukiSideMenu.Items>
+        </suki:SukiSideMenu>
+    </suki:SukiWindow.Content>
+
+</suki:SukiWindow>

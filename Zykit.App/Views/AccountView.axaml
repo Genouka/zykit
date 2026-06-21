@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Zykit.App.ViewModels"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Zykit.App.Views.AccountView"
+             x:DataType="vm:AccountViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="30" Spacing="20">
+            <TextBlock Text="账号管理" FontSize="24" FontWeight="Bold" Margin="0,0,0,5" />
+            <TextBlock Text="登录华为开发者账号后，才能使用签名和安装功能" Opacity="0.5" Margin="0,0,0,10" />
+
+            <suki:GlassCard>
+                <StackPanel Margin="20" Spacing="15">
+                    <TextBlock Text="{Binding LoginStatus}" FontSize="16" />
+                    <TextBlock Text="{Binding UserDetail}" FontSize="12" Opacity="0.6" />
+                    <TextBlock Text="{Binding ExpiryInfo}" FontSize="12" Opacity="0.5" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+                        <Button Command="{Binding LoginCommand}"
+                                IsVisible="{Binding !IsLoggedIn}"
+                                IsEnabled="{Binding !IsLoggingIn}"
+                                HorizontalAlignment="Left" Padding="20,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                <TextBlock Text="{Binding IsLoggingIn, Converter={x:Static StringConverters.IsNotNullOrEmpty}, ConverterParameter='登录中...|登录华为账号'}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding LogoutCommand}"
+                                IsVisible="{Binding IsLoggedIn}"
+                                HorizontalAlignment="Left" Padding="20,10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                                <TextBlock Text="退出登录" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </suki:GlassCard>
+
+            <suki:GlassCard IsVisible="{Binding IsLoggedIn}">
+                <StackPanel Margin="20" Spacing="10">
+                    <TextBlock Text="登录状态" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="登录有效期内无需重新登录，过期后会自动提示" Opacity="0.6" />
+                </StackPanel>
+            </suki:GlassCard>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

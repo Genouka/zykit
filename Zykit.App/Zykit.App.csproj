@@ -1,0 +1,78 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- 应用版本号 (构建时自动写入 version.json) -->
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0</FileVersion>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <!-- 启用 Native AOT 发布 (dotnet publish -r win-x64 -c Release 时生效) -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- AOT 体积优化 -->
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+    <StackTraceSupport>false</StackTraceSupport>
+    <StripSymbols>true</StripSymbols>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <!-- 构建时自动生成版本信息源文件 (编译期常量，AOT 友好) -->
+  <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <_VersionInfoPath>$(IntermediateOutputPath)VersionInfo.g.cs</_VersionInfoPath>
+      <_BuildTime>$([System.DateTime]::UtcNow.ToString("o"))</_BuildTime>
+    </PropertyGroup>
+    <ItemGroup>
+      <!-- 每行作为独立 Item，避免 WriteLinesToFile 把分号当作分隔符 -->
+      <VersionLine Include="// &lt;auto-generated/&gt; 由 MSBuild Target GenerateVersionInfo 生成，请勿手动编辑。" />
+      <VersionLine Include="namespace Zykit.App.Generated%3B" />
+      <VersionLine Include="internal static class VersionInfo" />
+      <VersionLine Include="{" />
+      <VersionLine Include="    public const string Version = &quot;$(Version)&quot;%3B" />
+      <VersionLine Include="    public const string FileVersion = &quot;$(FileVersion)&quot;%3B" />
+      <VersionLine Include="    public const string BuildTime = &quot;$(_BuildTime)&quot;%3B" />
+      <VersionLine Include="}" />
+    </ItemGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)" Condition="!Exists('$(IntermediateOutputPath)')" />
+    <WriteLinesToFile File="$(_VersionInfoPath)" Lines="@(VersionLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(_VersionInfoPath)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- 排除原生库的 .pdb 调试符号文件 (运行时不需要) -->
+  <Target Name="ExcludePdbFromPublish" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- 将内嵌工具复制到输出目录（排除已由纯 C# 替代的 JRE 与 hap-sign-tool.jar） -->
+  <ItemGroup>
+    <None Include="tools\**" CopyToOutputDirectory="PreserveNewest" LinkBase="tools\" Exclude="tools\jre\**;tools\lib\hap-sign-tool.jar" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.0.4" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.0.4" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.4" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+    <PackageReference Include="SukiUI" Version="7.0.1" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1" />
+  </ItemGroup>
+</Project>
