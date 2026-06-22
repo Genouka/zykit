@@ -9,6 +9,7 @@
                  x:Class="Zykit.App.Views.MainWindow"
                  x:DataType="vm:MainWindowViewModel"
                  Title="织月工具箱"
+                 Icon="avares://Zykit.App/Assets/zykit.ico"
                  BackgroundStyle="{Binding Theme.BackgroundStyle}"
                  BackgroundAnimationEnabled="{Binding Theme.BackgroundAnimationEnabled}"
                  BackgroundTransitionsEnabled="{Binding Theme.BackgroundTransitionsEnabled}">
