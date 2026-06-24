@@ -9,6 +9,10 @@
 
 [官网](https://zhiyue.qiumingsanyu.top/)
 
+## Contribute
+
+See [CONTRIBUTION Document](CONTRIBUTION.md)
+
 ## License
 
 All code files in this project are licensed under Apache 2.0.
