@@ -98,7 +98,7 @@ We expect all participants to be respectful and constructive. Please read our Co
 
 ## Questions?
 
-Feel free to open an issue or reach out to the maintainers at [maintainer@example.com].
+Feel free to open an issue or reach out to the maintainers at [master@genouka.top](mailto:master@genouka.top).
 
 Thank you for contributing!
 
